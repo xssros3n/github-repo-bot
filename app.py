@@ -5,6 +5,7 @@ Optimized for Render.com free tier deployment
 
 import os
 import asyncio
+from threading import Thread
 from flask import Flask, request, jsonify
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -19,6 +20,7 @@ app = Flask(__name__)
 
 # Global bot application
 bot_app = None
+event_loop = None
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -107,15 +109,11 @@ def create_application():
 @app.route('/', methods=['GET'])
 def health_check():
     """Health check endpoint for Render"""
-    return jsonify({
-        'status': 'ok',
-        'message': 'GitHub Repository Downloader Bot is running',
-        'webhook_configured': config.WEBHOOK_URL is not None
-    }), 200
+    return "Bot is running", 200
 
 
 @app.route(f'/{config.TELEGRAM_BOT_TOKEN}', methods=['POST'])
-async def webhook():
+def webhook():
     """Handle incoming webhook updates from Telegram"""
     try:
         # Get update from request
@@ -124,8 +122,11 @@ async def webhook():
         # Create Update object
         update = Update.de_json(update_data, bot_app.bot)
         
-        # Process update
-        await bot_app.process_update(update)
+        # Process update asynchronously
+        asyncio.run_coroutine_threadsafe(
+            bot_app.process_update(update),
+            event_loop
+        )
         
         return jsonify({'ok': True}), 200
         
@@ -135,15 +136,21 @@ async def webhook():
 
 
 @app.route('/set_webhook', methods=['GET'])
-async def set_webhook_endpoint():
+def set_webhook_endpoint():
     """Manually trigger webhook setup (for debugging)"""
     try:
         webhook_url = f"{config.WEBHOOK_URL}/{config.TELEGRAM_BOT_TOKEN}"
-        await bot_app.bot.set_webhook(
-            url=webhook_url,
-            allowed_updates=Update.ALL_TYPES,
-            drop_pending_updates=True
-        )
+        
+        async def _set_webhook():
+            await bot_app.bot.set_webhook(
+                url=webhook_url,
+                allowed_updates=Update.ALL_TYPES,
+                drop_pending_updates=True
+            )
+        
+        future = asyncio.run_coroutine_threadsafe(_set_webhook(), event_loop)
+        future.result(timeout=10)
+        
         return jsonify({
             'ok': True,
             'message': 'Webhook set successfully',
@@ -155,35 +162,59 @@ async def set_webhook_endpoint():
 
 
 @app.route('/webhook_info', methods=['GET'])
-async def webhook_info():
+def webhook_info():
     """Get current webhook information"""
     try:
-        webhook_info = await bot_app.bot.get_webhook_info()
+        async def _get_info():
+            return await bot_app.bot.get_webhook_info()
+        
+        future = asyncio.run_coroutine_threadsafe(_get_info(), event_loop)
+        info = future.result(timeout=10)
+        
         return jsonify({
             'ok': True,
-            'url': webhook_info.url,
-            'has_custom_certificate': webhook_info.has_custom_certificate,
-            'pending_update_count': webhook_info.pending_update_count,
-            'last_error_date': webhook_info.last_error_date,
-            'last_error_message': webhook_info.last_error_message,
-            'max_connections': webhook_info.max_connections,
-            'allowed_updates': webhook_info.allowed_updates
+            'url': info.url,
+            'has_custom_certificate': info.has_custom_certificate,
+            'pending_update_count': info.pending_update_count,
+            'last_error_date': info.last_error_date,
+            'last_error_message': info.last_error_message,
+            'max_connections': info.max_connections,
+            'allowed_updates': info.allowed_updates
         }), 200
     except Exception as e:
         logger.error(f"Error getting webhook info: {e}")
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 
+def run_async_loop():
+    """Run the asyncio event loop in a separate thread"""
+    global event_loop
+    event_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(event_loop)
+    event_loop.run_forever()
+
+
 def initialize_bot():
     """Initialize the bot application"""
-    global bot_app
+    global bot_app, event_loop
     
     try:
         logger.info("Initializing bot...")
+        
+        # Start event loop in separate thread
+        loop_thread = Thread(target=run_async_loop, daemon=True)
+        loop_thread.start()
+        
+        # Wait for event loop to be ready
+        import time
+        time.sleep(0.5)
+        
+        # Create bot application
         bot_app = create_application()
         
         # Initialize the application
-        asyncio.run(bot_app.initialize())
+        future = asyncio.run_coroutine_threadsafe(bot_app.initialize(), event_loop)
+        future.result(timeout=30)
         
         logger.info("Bot initialized and ready to receive webhooks")
         return True
@@ -210,7 +241,7 @@ if __name__ == '__main__':
         exit(1)
     
     # Run Flask app
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 10000))
     logger.info(f"Starting Flask server on port {port}")
     
     app.run(
