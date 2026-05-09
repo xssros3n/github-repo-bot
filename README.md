@@ -8,12 +8,12 @@ A production-ready Telegram bot that downloads public GitHub repositories and se
 
 ## ✨ Features
 
-- 📥 Download any public GitHub repository
+- 📥 Download any public GitHub repository as ZIP
 - 🔍 Automatic branch detection (main/master)
 - 📊 Repository information preview (stars, forks, size)
-- ⚡ Fast async downloads
+- ⚡ Fast async downloads with concurrent support
 - 🛡️ Rate limiting and anti-spam protection
-- 📦 File size validation
+- 📦 File size validation (configurable)
 - 🧹 Automatic cleanup of temporary files
 - 📝 Comprehensive logging system
 - 🔒 Security-focused (public repos only)
@@ -23,7 +23,6 @@ A production-ready Telegram bot that downloads public GitHub repositories and se
 
 ### 1. Fork/Clone This Repository
 
-Click the "Fork" button on GitHub or clone:
 ```bash
 git clone https://github.com/YOUR_USERNAME/github-repo-bot.git
 ```
@@ -32,8 +31,8 @@ git clone https://github.com/YOUR_USERNAME/github-repo-bot.git
 
 1. Go to [TeleBotHost Console](https://console.telebothost.com/)
 2. Sign up / Login
-3. Click "Create New Bot"
-4. Select "Deploy from Git"
+3. Click **"Create New Bot"**
+4. Select **"Deploy from Git"**
 5. Connect your GitHub account
 6. Select this repository
 7. Configure:
@@ -45,23 +44,11 @@ git clone https://github.com/YOUR_USERNAME/github-repo-bot.git
    GITHUB_TOKEN=your_github_token_optional
    CLOUD_HOSTING=true
    ```
-9. Click "Deploy"
+9. Click **"Deploy"**
 10. Wait 2-3 minutes
 11. Test your bot in Telegram!
 
 **That's it! Your bot is live!** 🎉
-
-## 📖 Documentation
-
-- **[START_HERE.md](START_HERE.md)** - Start here for quick overview
-- **[TELEBOTHOST_QUICKSTART.md](TELEBOTHOST_QUICKSTART.md)** - 10-minute TeleBotHost deployment
-- **[TELEBOTHOST_DEPLOYMENT.md](TELEBOTHOST_DEPLOYMENT.md)** - Complete TeleBotHost guide
-- **[LOCAL_VS_CLOUD.md](LOCAL_VS_CLOUD.md)** - Compare deployment options
-- **[QUICKSTART.md](QUICKSTART.md)** - Local setup guide
-- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Code architecture explanation
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem solving guide
-- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Production deployment checklist
 
 ## 🎮 Bot Commands
 
@@ -107,10 +94,11 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env and add your TELEGRAM_BOT_TOKEN
 
-# Run bot (local version)
+# Run bot
+# For local/VPS:
 python bot.py
 
-# Or run cloud-optimized version
+# For cloud (TeleBotHost):
 python bot_cloud.py
 ```
 
@@ -132,11 +120,10 @@ github-repo-bot/
 ├── services/                   # Business logic
 │   ├── github_service.py      # GitHub API
 │   └── telegram_service.py    # Telegram utilities
-├── utils/                      # Utilities
-│   ├── validators.py          # Input validation
-│   ├── cleanup.py             # File cleanup
-│   └── logger.py              # Logging
-└── docs/                       # Documentation (*.md files)
+└── utils/                      # Utilities
+    ├── validators.py          # Input validation
+    ├── cleanup.py             # File cleanup
+    └── logger.py              # Logging
 ```
 
 ## ⚙️ Configuration
@@ -154,6 +141,21 @@ github-repo-bot/
 | `CLOUD_HOSTING` | ❌ No | true | Enable cloud optimizations |
 | `MAX_CONCURRENT_DOWNLOADS` | ❌ No | 5 | Max concurrent downloads |
 | `CLEANUP_INTERVAL` | ❌ No | 300 | Cleanup interval in seconds |
+
+### Getting Bot Token
+
+1. Open Telegram and search for `@BotFather`
+2. Send `/newbot` command
+3. Follow the instructions
+4. Copy the token provided
+
+### Getting GitHub Token (Optional but Recommended)
+
+1. Go to https://github.com/settings/tokens
+2. Click "Generate new token (classic)"
+3. Give it a name: "Telegram Bot"
+4. No scopes needed for public repos
+5. Generate and copy the token
 
 ## 🔐 Security Features
 
@@ -182,18 +184,36 @@ github-repo-bot/
 - ✅ 99.9% uptime SLA
 - ✅ Auto-scaling
 - ✅ Built-in monitoring
-- 📖 [TeleBotHost Guide](TELEBOTHOST_QUICKSTART.md)
 
 ### Option 2: VPS with systemd
 - ✅ Full control
 - ✅ Custom configurations
 - ⚠️ Requires server management
-- 📖 [VPS Deployment Guide](DEPLOYMENT_CHECKLIST.md)
 
 ### Option 3: Docker
 - ✅ Containerized
 - ✅ Easy to scale
-- 📖 [Docker Guide](SETUP_GUIDE.md#docker)
+
+## 🔄 Updating Your Bot
+
+### On TeleBotHost (Automatic)
+
+If you enabled "Auto-deploy on push":
+
+```bash
+# Make changes to your code
+git add .
+git commit -m "Update bot"
+git push origin main
+
+# TeleBotHost automatically deploys!
+```
+
+### Manual Update
+
+1. Push changes to GitHub
+2. Go to TeleBotHost dashboard
+3. Click "Redeploy"
 
 ## 🐛 Troubleshooting
 
@@ -211,25 +231,6 @@ github-repo-bot/
 - Repository might be too large (> 50MB)
 - Network timeout (increase `DOWNLOAD_TIMEOUT`)
 - GitHub rate limit (add `GITHUB_TOKEN`)
-
-**For more help, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)**
-
-## 📈 Monitoring
-
-### TeleBotHost Dashboard
-- Real-time logs
-- Performance metrics
-- Error tracking
-- Resource usage
-
-### Local Monitoring
-```bash
-# View logs
-tail -f logs/bot_*.log
-
-# Check errors
-grep ERROR logs/bot_*.log
-```
 
 ## 🤝 Contributing
 
@@ -252,19 +253,12 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## 📞 Support
 
-- 📖 **Documentation**: Read the .md files in this repository
 - 🐛 **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/github-repo-bot/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/github-repo-bot/discussions)
 
 ## ⭐ Star This Repository
 
 If you find this bot useful, please give it a star! ⭐
-
-## 🚀 Get Started
-
-1. **Quick Deploy**: [TeleBotHost Quickstart](TELEBOTHOST_QUICKSTART.md)
-2. **Local Setup**: [Quickstart Guide](QUICKSTART.md)
-3. **Full Documentation**: [Start Here](START_HERE.md)
 
 ---
 
