@@ -1,63 +1,65 @@
 # 🤖 GitHub Repository Downloader Bot
 
-A production-ready Telegram bot that downloads public GitHub repositories and sends them as ZIP files. Optimized for cloud hosting on [TeleBotHost](https://console.telebothost.com/).
+A production-ready Telegram bot that downloads public GitHub repositories and sends them as ZIP files. Optimized for **Render.com** free hosting - fast and responsive!
 
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot-blue.svg)](https://core.telegram.org/bots)
+[![Render](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://render.com/)
 
 ## ✨ Features
 
 - 📥 Download any public GitHub repository as ZIP
 - 🔍 Automatic branch detection (main/master)
 - 📊 Repository information preview (stars, forks, size)
-- ⚡ Fast async downloads with concurrent support
+- ⚡ Fast async downloads
 - 🛡️ Rate limiting and anti-spam protection
 - 📦 File size validation (configurable)
 - 🧹 Automatic cleanup of temporary files
 - 📝 Comprehensive logging system
 - 🔒 Security-focused (public repos only)
-- ☁️ Cloud-optimized for TeleBotHost
+- ☁️ Optimized for Render.com
 
-## 🚀 Quick Deploy on TeleBotHost
+## 🚀 Quick Deploy on Render.com (FREE)
 
-### 1. Fork/Clone This Repository
+### 1. Push to GitHub
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/github-repo-bot.git
+cd github-repo-bot
+git remote add origin https://github.com/YOUR_USERNAME/github-repo-bot.git
+git push -u origin main
 ```
 
-### 2. Deploy on TeleBotHost
+### 2. Deploy on Render
 
-1. Go to [TeleBotHost Console](https://console.telebothost.com/)
-2. Sign up / Login
-3. Click **"Create New Bot"**
-4. Select **"Deploy from Git"**
-5. Connect your GitHub account
-6. Select this repository
-7. Configure:
-   - **Start Command**: `python bot_cloud.py`
-   - **Python Version**: `3.12`
-8. Add Environment Variables:
+1. Go to [Render.com](https://render.com/)
+2. Sign up with GitHub
+3. Click **"New +"** → **"Web Service"**
+4. Connect your repository
+5. Configure:
+   - **Build**: `pip install -r requirements.txt`
+   - **Start**: `python bot.py`
+   - **Plan**: Free
+6. Add Environment Variable:
    ```
-   TELEGRAM_BOT_TOKEN=your_bot_token_from_botfather
-   GITHUB_TOKEN=your_github_token_optional
-   CLOUD_HOSTING=true
+   TELEGRAM_BOT_TOKEN=your_token_from_botfather
    ```
-9. Click **"Deploy"**
-10. Wait 2-3 minutes
-11. Test your bot in Telegram!
+7. Click **"Create Web Service"**
+8. Wait 3-5 minutes
+9. Test in Telegram!
 
 **That's it! Your bot is live!** 🎉
+
+**📖 Full Guide:** [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)
 
 ## 🎮 Bot Commands
 
 ```
-/start          - Start the bot and see welcome message
-/help           - Get help and usage instructions
-/stats          - View your download statistics
+/start          - Start the bot
+/help           - Get help
+/stats          - View statistics
 
-<GitHub URL>    - Send any public GitHub repository URL to download
+<GitHub URL>    - Download repository
 ```
 
 **Example:**
@@ -80,40 +82,28 @@ cd github-repo-bot
 
 # Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/macOS
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure environment
+# Configure
 cp .env.example .env
-# Edit .env and add your TELEGRAM_BOT_TOKEN
+# Edit .env and add TELEGRAM_BOT_TOKEN
 
-# Run bot
-# For local/VPS:
+# Run
 python bot.py
-
-# For cloud (TeleBotHost):
-python bot_cloud.py
 ```
 
 ## 📁 Project Structure
 
 ```
 github-repo-bot/
-├── bot.py                      # Standard bot (local/VPS)
-├── bot_cloud.py                # Cloud-optimized bot (TeleBotHost)
-├── config.py                   # Standard configuration
-├── config_cloud.py             # Cloud configuration
-├── requirements.txt            # Python dependencies
-├── runtime.txt                 # Python version for cloud
-├── Procfile                    # Process definition
-├── .telebothost.yml           # TeleBotHost configuration
+├── bot.py                      # Main bot application
+├── config.py                   # Configuration
+├── requirements.txt            # Dependencies
+├── render.yaml                 # Render.com config
 ├── handlers/                   # Command handlers
 │   ├── start_handler.py       # /start, /help, /stats
 │   └── repo_handler.py        # GitHub URL processing
@@ -133,123 +123,95 @@ github-repo-bot/
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `TELEGRAM_BOT_TOKEN` | ✅ Yes | - | Your Telegram bot token |
-| `GITHUB_TOKEN` | ❌ No | - | GitHub token (increases rate limit) |
-| `RATE_LIMIT_REQUESTS` | ❌ No | 10 | Max requests per time window |
+| `GITHUB_TOKEN` | ❌ No | - | GitHub token (recommended) |
+| `RATE_LIMIT_REQUESTS` | ❌ No | 5 | Max requests per window |
 | `RATE_LIMIT_WINDOW` | ❌ No | 60 | Time window in seconds |
-| `MAX_FILE_SIZE_MB` | ❌ No | 50 | Maximum file size to download |
-| `DOWNLOAD_TIMEOUT` | ❌ No | 180 | Download timeout in seconds |
-| `CLOUD_HOSTING` | ❌ No | true | Enable cloud optimizations |
-| `MAX_CONCURRENT_DOWNLOADS` | ❌ No | 5 | Max concurrent downloads |
-| `CLEANUP_INTERVAL` | ❌ No | 300 | Cleanup interval in seconds |
+| `MAX_FILE_SIZE_MB` | ❌ No | 50 | Maximum file size |
+| `DOWNLOAD_TIMEOUT` | ❌ No | 300 | Download timeout |
 
 ### Getting Bot Token
 
-1. Open Telegram and search for `@BotFather`
-2. Send `/newbot` command
-3. Follow the instructions
-4. Copy the token provided
+1. Open Telegram → Search `@BotFather`
+2. Send `/newbot`
+3. Follow instructions
+4. Copy the token
 
-### Getting GitHub Token (Optional but Recommended)
+### Getting GitHub Token (Optional)
 
 1. Go to https://github.com/settings/tokens
-2. Click "Generate new token (classic)"
-3. Give it a name: "Telegram Bot"
-4. No scopes needed for public repos
-5. Generate and copy the token
+2. Generate new token (classic)
+3. No scopes needed for public repos
+4. Copy the token
 
 ## 🔐 Security Features
 
-- ✅ Input validation (regex-based URL validation)
-- ✅ Rate limiting (per-user request throttling)
-- ✅ Filename sanitization (path traversal prevention)
-- ✅ Public repositories only (private repo protection)
-- ✅ File size validation (configurable limits)
-- ✅ Timeout protection (prevents hanging requests)
-- ✅ No credential storage (secure by design)
-- ✅ Comprehensive logging (full audit trail)
+- ✅ Input validation
+- ✅ Rate limiting
+- ✅ Filename sanitization
+- ✅ Public repos only
+- ✅ File size validation
+- ✅ Timeout protection
+- ✅ Comprehensive logging
 
 ## 📊 Performance
 
-- **Response Time**: < 2 seconds (small repos)
+- **Response Time**: < 2 seconds
 - **Memory Usage**: 50-100MB
-- **Concurrent Users**: Unlimited (rate limited per user)
-- **Uptime**: 99.9% (on TeleBotHost)
-- **Auto-scaling**: Yes (on TeleBotHost)
-
-## 🌐 Deployment Options
-
-### Option 1: TeleBotHost (Recommended)
-- ✅ Easiest deployment (10 minutes)
-- ✅ No server management
-- ✅ 99.9% uptime SLA
-- ✅ Auto-scaling
-- ✅ Built-in monitoring
-
-### Option 2: VPS with systemd
-- ✅ Full control
-- ✅ Custom configurations
-- ⚠️ Requires server management
-
-### Option 3: Docker
-- ✅ Containerized
-- ✅ Easy to scale
+- **Concurrent Users**: Unlimited (rate limited)
+- **Uptime**: 99.9% on Render.com
 
 ## 🔄 Updating Your Bot
 
-### On TeleBotHost (Automatic)
-
-If you enabled "Auto-deploy on push":
-
 ```bash
-# Make changes to your code
 git add .
-git commit -m "Update bot"
+git commit -m "Update"
 git push origin main
-
-# TeleBotHost automatically deploys!
+# Render auto-deploys!
 ```
-
-### Manual Update
-
-1. Push changes to GitHub
-2. Go to TeleBotHost dashboard
-3. Click "Redeploy"
 
 ## 🐛 Troubleshooting
 
 ### Bot doesn't start
-- Check `TELEGRAM_BOT_TOKEN` is set correctly
-- Verify Python version is 3.12+
-- Check logs for error messages
+- Check `TELEGRAM_BOT_TOKEN` in Render dashboard
+- View logs in Render
+- Verify Python version
 
 ### Repository not found
 - Ensure repository is public
-- Verify URL format is correct
-- Check repository exists on GitHub
+- Check URL format
+- Verify repository exists
 
 ### Download fails
-- Repository might be too large (> 50MB)
-- Network timeout (increase `DOWNLOAD_TIMEOUT`)
-- GitHub rate limit (add `GITHUB_TOKEN`)
+- Repository too large (> 50MB)
+- Add `GITHUB_TOKEN` for better rate limits
+
+**📖 Full Troubleshooting:** [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)
+
+## 💰 Render.com Pricing
+
+- **Free Tier**: 750 hours/month (enough for 1 bot)
+- **Starter**: $7/month (always-on, faster)
+
+**Note:** Free tier sleeps after 15 min inactivity. First request takes 30-60 sec to wake up.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please:
+Contributions welcome! Please:
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
+2. Create feature branch
+3. Make changes
 4. Test thoroughly
-5. Submit a pull request
+5. Submit pull request
 
 ## 📝 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) - Telegram Bot API wrapper
-- [GitHub API](https://docs.github.com/en/rest) - Repository data
-- [TeleBotHost](https://console.telebothost.com/) - Cloud hosting platform
+- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
+- [GitHub API](https://docs.github.com/en/rest)
+- [Render.com](https://render.com/)
 
 ## 📞 Support
 
@@ -258,10 +220,10 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## ⭐ Star This Repository
 
-If you find this bot useful, please give it a star! ⭐
+If you find this bot useful, please star it! ⭐
 
 ---
 
 **Made with ❤️ for the Telegram community**
 
-**Deploy now on [TeleBotHost](https://console.telebothost.com/)** 🚀
+**Deploy now on [Render.com](https://render.com/)** 🚀

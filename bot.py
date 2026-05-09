@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import signal
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from config import config
@@ -7,6 +8,9 @@ from utils.logger import logger
 from utils.cleanup import CleanupManager
 from handlers.start_handler import start_command, help_command, stats_command
 from handlers.repo_handler import handle_repo_url
+
+# Global flag for graceful shutdown
+shutdown_flag = False
 
 async def error_handler(update: Update, context):
     """Handle errors"""
@@ -27,13 +31,25 @@ async def post_shutdown(application: Application):
     """Cleanup on shutdown"""
     logger.info("Shutting down bot...")
     CleanupManager.cleanup_old_files(max_age_hours=0)
+    logger.info("Cleanup completed")
+
+def signal_handler(signum, frame):
+    """Handle shutdown signals"""
+    global shutdown_flag
+    shutdown_flag = True
+    logger.info(f"Received signal {signum}, initiating graceful shutdown...")
 
 def main():
     """Start the bot"""
     try:
+        # Register signal handlers for graceful shutdown
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
+        
         # Validate configuration
         config.validate()
         logger.info("Configuration validated")
+        logger.info("Starting GitHub Repository Downloader Bot...")
         
         # Create application
         application = (
@@ -41,6 +57,9 @@ def main():
             .token(config.TELEGRAM_BOT_TOKEN)
             .post_init(post_init)
             .post_shutdown(post_shutdown)
+            .connect_timeout(30)
+            .read_timeout(30)
+            .write_timeout(30)
             .build()
         )
         
@@ -58,6 +77,7 @@ def main():
         application.add_error_handler(error_handler)
         
         logger.info("Bot started successfully!")
+        logger.info("Bot is now running and ready to accept requests")
         logger.info("Press Ctrl+C to stop")
         
         # Run bot with proper event loop handling
@@ -67,7 +87,12 @@ def main():
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
+        # Run with optimized settings for Render.com
+        application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True,
+            close_loop=False
+        )
         
     except ValueError as e:
         logger.error(f"Configuration error: {e}")
