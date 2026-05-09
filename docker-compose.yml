@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  github-bot:
+    build: .
+    container_name: github-repo-bot
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

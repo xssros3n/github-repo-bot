@@ -1,0 +1,32 @@
+name: github-repo-downloader
+runtime: python-3.12
+start_command: python bot_cloud.py
+
+environment:
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+  RATE_LIMIT_REQUESTS: 10
+  RATE_LIMIT_WINDOW: 60
+  MAX_FILE_SIZE_MB: 50
+  DOWNLOAD_TIMEOUT: 180
+  GITHUB_TOKEN: ${GITHUB_TOKEN}
+  LOG_LEVEL: INFO
+  CLOUD_HOSTING: true
+  MAX_CONCURRENT_DOWNLOADS: 5
+  CLEANUP_INTERVAL: 300
+
+resources:
+  memory: 512MB
+  cpu: 1
+
+health_check:
+  enabled: true
+  interval: 60
+  timeout: 10
+
+auto_restart:
+  enabled: true
+  max_restarts: 5
+
+logging:
+  level: INFO
+  retention_days: 7
